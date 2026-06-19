@@ -175,7 +175,7 @@ export function JsonFormatterPage() {
   const PANE_HEIGHT = "calc(100vh - 48px - 102px - 120px)"; // viewport - header - leaderboard - toolbar
 
   return (
-    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "20px 16px 40px" }}>
+    <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "20px 24px 40px" }}>
       {/* Page header */}
       <div style={{ marginBottom: "16px" }}>
         <h1 style={{ margin: "0 0 4px", fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
@@ -353,71 +353,63 @@ function ErrorBanner({ message, repairAvailable, onRepair }: { message: string; 
 }
 
 function SeoContent() {
+  const colStyle: React.CSSProperties = {
+    flex: "1 1 0",
+    minWidth: 0,
+    padding: "20px 24px",
+    background: "var(--bg-surface)",
+    border: "1px solid var(--border)",
+    borderRadius: "8px",
+  };
+  const h2Style: React.CSSProperties = {
+    margin: "0 0 10px",
+    fontSize: "14px",
+    fontWeight: 700,
+    color: "var(--text-primary)",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  };
+  const bodyStyle: React.CSSProperties = {
+    fontSize: "13px",
+    color: "var(--text-secondary)",
+    lineHeight: 1.6,
+    margin: 0,
+  };
+
   return (
-    <div style={{ maxWidth: "720px", marginTop: "56px", color: "var(--text-secondary)", fontSize: "15px", lineHeight: 1.7 }}>
-      <h2 style={{ color: "var(--text-primary)", fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>
-        What this tool does
-      </h2>
-      <p>
-        DevUtils JSON Formatter parses, formats, and validates JSON entirely inside your browser.
-        Nothing is uploaded or logged — the privacy guarantee is architectural, not a policy.
-      </p>
+    <div style={{ marginTop: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+      {/* Col 1 — What it does */}
+      <div style={colStyle}>
+        <h2 style={h2Style}>What this tool does</h2>
+        <p style={bodyStyle}>
+          Parses, formats, and validates JSON entirely inside your browser.
+          Nothing is uploaded — the privacy guarantee is architectural, not a policy.
+        </p>
+      </div>
 
-      <h2 style={{ color: "var(--text-primary)", fontSize: "18px", fontWeight: 700, marginTop: "32px", marginBottom: "8px" }}>
-        How to use it
-      </h2>
-      <ol style={{ paddingLeft: "20px", margin: 0 }}>
-        <li>Paste JSON into the input pane, or drag and drop a <code style={{ fontFamily: "var(--font-mono)", fontSize: "13px" }}>.json</code> file.</li>
-        <li>The output is formatted automatically. Use the toolbar to minify, repair, or sort keys.</li>
-        <li>Switch to Tree view to explore nested data. Use Search or JSONPath to filter.</li>
-        <li>Click <strong>TS Interface</strong> to generate a TypeScript type definition from the JSON shape.</li>
-      </ol>
+      {/* Col 2 — How to use */}
+      <div style={colStyle}>
+        <h2 style={h2Style}>How to use it</h2>
+        <ol style={{ ...bodyStyle, paddingLeft: "16px", margin: 0 }}>
+          <li>Paste JSON or drag &amp; drop a <code style={{ fontFamily: "var(--font-mono)" }}>.json</code> file</li>
+          <li>Output formats automatically — use toolbar to minify, repair, or sort</li>
+          <li>Switch to Tree view to explore nested data</li>
+          <li>Click <strong>TS Interface</strong> to generate TypeScript types</li>
+        </ol>
+      </div>
 
-      <h2 style={{ color: "var(--text-primary)", fontSize: "18px", fontWeight: 700, marginTop: "32px", marginBottom: "8px" }}>
-        Features
-      </h2>
-      <ul style={{ paddingLeft: "20px", margin: 0 }}>
-        <li><strong>Auto-repair</strong> — fixes trailing commas, single-quoted strings, JS comments, and unquoted keys</li>
-        <li><strong>Tree view</strong> — explore nested JSON with expand/collapse. Handles arrays and objects of any depth.</li>
-        <li><strong>JSONPath search</strong> — filter by key name, value, or full JSONPath expression (e.g. <code style={{ fontFamily: "var(--font-mono)", fontSize: "13px" }}>$.user.email</code>)</li>
-        <li><strong>Large file support</strong> — Web Worker processing keeps the tab responsive on 5MB+ files</li>
-        <li><strong>TypeScript interface</strong> — generate accurate TS types from any JSON structure</li>
-        <li><strong>Keyboard shortcuts</strong> — format, minify, copy, and clear without touching the mouse</li>
-        <li><strong>Shareable URLs</strong> — encode small JSON (&le;5KB) in the URL hash for sharing with teammates</li>
-      </ul>
-
-      <h2 style={{ color: "var(--text-primary)", fontSize: "18px", fontWeight: 700, marginTop: "32px", marginBottom: "8px" }}>
-        Frequently Asked Questions
-      </h2>
-      <dl>
-        {[
-          {
-            q: "Does this tool send my JSON to a server?",
-            a: "No. All processing happens in your browser using JavaScript and a Web Worker. No data is transmitted over the network.",
-          },
-          {
-            q: "Can it handle large JSON files?",
-            a: "Yes. Files up to 5MB+ are handled via a Web Worker, so the main browser thread stays responsive. Virtual scrolling ensures the output renders smoothly regardless of line count.",
-          },
-          {
-            q: "What kinds of broken JSON can it repair?",
-            a: "Trailing commas, single-quoted strings, JavaScript-style comments (// and /* */), unquoted object keys, and missing closing brackets or braces.",
-          },
-          {
-            q: "How do I generate a TypeScript interface from JSON?",
-            a: "Paste your JSON, then click the 'TS Interface' button in the toolbar. The tool will infer types for all fields, mark nullable fields as optional, and generate nested interfaces for nested objects.",
-          },
-          {
-            q: "What is JSONPath and how do I use the search?",
-            a: "JSONPath is a query language for JSON, similar to XPath for XML. Type a key name to find matching fields, or use a path like $.store.books[0].title to navigate directly to a value.",
-          },
-        ].map(({ q, a }) => (
-          <div key={q} style={{ marginBottom: "20px" }}>
-            <dt style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>{q}</dt>
-            <dd style={{ margin: 0, color: "var(--text-secondary)" }}>{a}</dd>
-          </div>
-        ))}
-      </dl>
+      {/* Col 3 — Features */}
+      <div style={colStyle}>
+        <h2 style={h2Style}>Features</h2>
+        <ul style={{ ...bodyStyle, paddingLeft: "16px", margin: 0 }}>
+          <li><strong>Auto-repair</strong> — trailing commas, single quotes, JS comments</li>
+          <li><strong>Tree view</strong> — expand/collapse any depth</li>
+          <li><strong>JSONPath search</strong> — filter by key, value, or path</li>
+          <li><strong>Large files</strong> — Web Worker keeps tab responsive</li>
+          <li><strong>TS Interface</strong> — generate types from any JSON</li>
+          <li><strong>Shareable URLs</strong> — share JSON ≤5KB via URL hash</li>
+        </ul>
+      </div>
     </div>
   );
 }
