@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
+/* ── Design tokens ──────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-base:        #F8F9FA;
+  --bg-surface:     #FFFFFF;
+  --bg-subtle:      #F1F3F5;
+  --border:         #DEE2E6;
+  --text-primary:   #212529;
+  --text-secondary: #6C757D;
+  --text-muted:     #ADB5BD;
+  --accent:         #0F6FDC;
+  --accent-hover:   #0B5DBF;
+  --accent-subtle:  #E7F0FC;
+  --success:        #2D9B5A;
+  --error:          #C0392B;
+  --warning:        #B7600B;
+
+  /* JSON syntax tokens */
+  --token-string:  #2D9B5A;
+  --token-number:  #0F6FDC;
+  --token-boolean: #B7600B;
+  --token-null:    #B7600B;
+  --token-key:     #212529;
+  --token-punct:   #6C757D;
+  --token-error:   #C0392B;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif, "Apple Color Emoji";
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+               Courier, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --bg-base:        #0D1117;
+  --bg-surface:     #161B22;
+  --bg-subtle:      #21262D;
+  --border:         #30363D;
+  --text-primary:   #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted:     #484F58;
+  --accent:         #58A6FF;
+  --accent-hover:   #79B8FF;
+  --accent-subtle:  #1C2B3D;
+  --success:        #3FB950;
+  --error:          #F85149;
+  --warning:        #D29922;
+
+  --token-string:  #3FB950;
+  --token-number:  #58A6FF;
+  --token-boolean: #D29922;
+  --token-null:    #D29922;
+  --token-key:     #E6EDF3;
+  --token-punct:   #8B949E;
+  --token-error:   #F85149;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base resets ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* prevent horizontal overflow */
+body, main { overflow-x: hidden; }
+
+/* ── Focus ring ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Responsive: stack panes on mobile ─────────────────────── */
+@media (max-width: 767px) {
+  .formatter-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  .formatter-grid > div:first-child {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    min-height: 200px;
+  }
+}
+
+/* ── Scrollbar (subtle) ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Utility: sr-only ───────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }

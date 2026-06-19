@@ -1,0 +1,72 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { TOOLS } from "@/registry/tools";
+import { AdSlot } from "@/components/AdSlot";
+import { JsonFormatterPage } from "@/tools/json-formatter";
+
+export function generateStaticParams() {
+  return TOOLS.map((t) => ({ slug: t.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tool = TOOLS.find((t) => t.slug === slug);
+  if (!tool) return {};
+
+  return {
+    title: tool.title,
+    description: tool.description,
+    keywords: tool.keywords,
+    openGraph: {
+      title: tool.title,
+      description: tool.description,
+      type: "website",
+      url: `https://devutils.tools/tools/${tool.slug}`,
+    },
+    other: {
+      "application-name": tool.title,
+    },
+  };
+}
+
+const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
+  "json-formatter": JsonFormatterPage,
+
+};
+
+export default async function ToolPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const tool = TOOLS.find((t) => t.slug === slug);
+  if (!tool) notFound();
+
+  const Component = TOOL_COMPONENTS[slug];
+  if (!Component) notFound();
+
+  return (
+    <>
+      {/* Leaderboard ad — fixed height, no reflow */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          padding: "12px 16px",
+          background: "var(--bg-base)",
+        }}
+      >
+        <div className="hidden md:block">
+          <AdSlot variant="leaderboard" />
+        </div>
+      </div>
+
+      <Component />
+    </>
+  );
+}
