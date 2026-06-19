@@ -11,12 +11,10 @@ import { SearchBar } from "./components/SearchBar";
 import { RepairSuccessBanner } from "./components/RepairBanner";
 import { KeyboardLegend } from "./components/KeyboardLegend";
 import { canShare, encodeShareUrl, decodeShareUrl } from "@/lib/json/shareUrl";
-import { parse } from "@/lib/json/parse";
-import { toTypeScriptInterface } from "@/lib/json/toTypeScriptInterface";
 import type { RepairResult } from "@/lib/json/repair";
 import type { SearchMatch } from "@/lib/json/search";
 
-type ViewMode = "formatted" | "tree" | "ts";
+type ViewMode = "formatted" | "tree";
 
 interface ProcessedOutput {
   formatted: string;
@@ -35,7 +33,6 @@ export function JsonFormatterPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [repairAvailable, setRepairAvailable] = useState(false);
   const [repairInfo, setRepairInfo] = useState<RepairResult | null>(null);
-  const [tsOutput, setTsOutput] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([]);
@@ -60,12 +57,8 @@ export function JsonFormatterPage() {
         if (msg.repairInfo) setRepairInfo(msg.repairInfo);
         else setRepairInfo(null);
         setErrorMsg("");
-        if (viewMode === "ts") setViewMode("formatted");
       } else if (msg.type === "minified") {
         setOutput(prev => prev ? { ...prev, formatted: msg.result, tokens: [[`string:${msg.result}`]] } : null);
-      } else if (msg.type === "ts") {
-        setTsOutput(msg.result);
-        setViewMode("ts");
       } else if (msg.type === "searchResult") {
         setSearchMatches(msg.matches);
       } else if (msg.type === "error") {
@@ -119,23 +112,14 @@ export function JsonFormatterPage() {
   const handleMinify = useCallback(() => postToWorker({ type: "minify", input }), [input]);
   const handleRepair = useCallback(() => postToWorker({ type: "repair", input, indent: 2 }), [input]);
   const handleSortKeys = useCallback(() => postToWorker({ type: "sortKeys", input, indent: 2 }), [input]);
-  const handleToTs = useCallback(() => {
-    if (!input.trim()) return;
-    const parsed = parse(input);
-    if (!parsed.ok) return;
-    const result = toTypeScriptInterface(parsed.value);
-    setTsOutput(result);
-    setViewMode("ts");
-  }, [input]);
-
   const handleCopy = useCallback(() => {
-    const text = viewMode === "ts" ? tsOutput : output?.formatted ?? "";
+    const text = output?.formatted ?? "";
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
       setCopyDone(true);
       setTimeout(() => setCopyDone(false), 1500);
     });
-  }, [output, tsOutput, viewMode]);
+  }, [output]);
 
   const handleShare = useCallback(() => {
     if (!output?.formatted) return;
@@ -150,7 +134,6 @@ export function JsonFormatterPage() {
     setStatus("idle");
     setErrorMsg("");
     setRepairInfo(null);
-    setTsOutput("");
     setSearchQuery("");
     setSearchMatches([]);
   }, []);
@@ -178,7 +161,7 @@ export function JsonFormatterPage() {
   }, [handleFormat, handleMinify, handleClear, toggleSearch, handleCopy]);
 
   const hasInput = input.trim().length > 0;
-  const hasOutput = !!output || !!tsOutput;
+  const hasOutput = !!output;
   const shareDisabled = !canShare(input);
 
   const PANE_HEIGHT = "calc(100vh - 48px - 102px - 120px)"; // viewport - header - leaderboard - toolbar
@@ -200,7 +183,7 @@ export function JsonFormatterPage() {
         {/* Toolbar */}
         <Toolbar
           onFormat={handleFormat} onMinify={handleMinify} onRepair={handleRepair}
-          onToTs={handleToTs} onSortKeys={handleSortKeys} onCopy={handleCopy}
+          onSortKeys={handleSortKeys} onCopy={handleCopy}
           onShare={handleShare} onClear={handleClear} onToggleSearch={toggleSearch}
           copyDone={copyDone} shareDisabled={shareDisabled}
           hasInput={hasInput} hasOutput={hasOutput} isProcessing={isProcessing}
@@ -261,7 +244,7 @@ export function JsonFormatterPage() {
               padding: "0 10px", background: "var(--bg-subtle)",
               borderBottom: "1px solid var(--border)", flexShrink: 0, gap: "4px",
             }}>
-              {(["formatted", "tree", "ts"] as ViewMode[]).map((mode) => (
+              {(["formatted", "tree"] as ViewMode[]).map((mode) => (
                 <button
                   key={mode}
                   role="tab"
@@ -280,7 +263,7 @@ export function JsonFormatterPage() {
                     letterSpacing: "0.05em",
                   }}
                 >
-                  {mode === "ts" ? "TS Interface" : mode === "formatted" ? "Formatted" : "Tree"}
+                  {mode === "formatted" ? "Formatted" : "Tree"}
                 </button>
               ))}
               {output && (
@@ -297,18 +280,6 @@ export function JsonFormatterPage() {
               )}
               {viewMode === "tree" && (
                 <TreeView data={output?.treeData} />
-              )}
-              {viewMode === "ts" && (
-                <pre style={{
-                  margin: 0, padding: "12px",
-                  fontFamily: "var(--font-mono)", fontSize: "13px",
-                  color: "var(--text-primary)",
-                  background: "var(--bg-surface)",
-                  overflow: "auto", flex: 1,
-                  lineHeight: 1.6,
-                }}>
-                  {tsOutput || <span style={{ color: "var(--text-muted)" }}>Click &quot;TS Interface&quot; to generate</span>}
-                </pre>
               )}
             </div>
 
@@ -400,7 +371,6 @@ function SeoContent() {
           <li>Paste JSON or drag &amp; drop a <code style={{ fontFamily: "var(--font-mono)" }}>.json</code> file</li>
           <li>Output formats automatically — use toolbar to minify, repair, or sort</li>
           <li>Switch to Tree view to explore nested data</li>
-          <li>Click <strong>TS Interface</strong> to generate TypeScript types</li>
         </ol>
       </div>
 
@@ -412,7 +382,6 @@ function SeoContent() {
           <li><strong>Tree view</strong> — expand/collapse any depth</li>
           <li><strong>JSONPath search</strong> — filter by key, value, or path</li>
           <li><strong>Large files</strong> — Web Worker keeps tab responsive</li>
-          <li><strong>TS Interface</strong> — generate types from any JSON</li>
           <li><strong>Shareable URLs</strong> — share JSON ≤5KB via URL hash</li>
         </ul>
       </div>

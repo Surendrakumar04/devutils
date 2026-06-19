@@ -1,12 +1,11 @@
 "use client";
 
-import { Play, Minimize2, Wrench, Code2, Trash2, Copy, Share2, Search, SortAsc, ChevronDown } from "lucide-react";
+import { Play, Minimize2, Wrench, Trash2, Copy, Share2, Search, SortAsc, ChevronDown } from "lucide-react";
 
 interface ToolbarProps {
   onFormat: () => void;
   onMinify: () => void;
   onRepair: () => void;
-  onToTs: () => void;
   onSortKeys: () => void;
   onCopy: () => void;
   onShare: () => void;
@@ -112,9 +111,6 @@ export function Toolbar(props: ToolbarProps) {
 
       <div style={{ width: "1px", height: "22px", background: "var(--border)", margin: "0 2px", flexShrink: 0 }} />
 
-      <Btn onClick={props.onToTs} disabled={!hasInput || isProcessing} title="Generate TypeScript interface">
-        <Code2 size={13} /> TS Interface
-      </Btn>
       <Btn onClick={props.onSortKeys} disabled={!hasInput || isProcessing} title="Sort keys alphabetically">
         <SortAsc size={13} /> Sort Keys
       </Btn>
