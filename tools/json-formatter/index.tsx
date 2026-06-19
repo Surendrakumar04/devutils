@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { AlertTriangle, Wrench } from "lucide-react";
+import { useEffect, useRef, useState, useCallback, useReducer } from "react";
+import { AlertTriangle, Wrench, ChevronsDown, ChevronsUp } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { Toolbar } from "./components/Toolbar";
 import { InputPane } from "./components/InputPane";
@@ -23,6 +23,31 @@ interface ProcessedOutput {
   stats: { bytes: number; lines: number; keys: number };
 }
 
+function collectTreePaths(value: unknown, path: string, out: string[]): void {
+  if (Array.isArray(value)) {
+    out.push(path);
+    value.forEach((v, i) => collectTreePaths(v, `${path}[${i}]`, out));
+  } else if (value !== null && typeof value === "object") {
+    out.push(path);
+    Object.entries(value as Record<string, unknown>).forEach(([k, v]) =>
+      collectTreePaths(v, `${path}.${k}`, out)
+    );
+  }
+}
+
+type TreeAction =
+  | { type: "toggle"; path: string }
+  | { type: "expandAll"; paths: string[] }
+  | { type: "collapseAll" };
+
+function treeReducer(state: Set<string>, action: TreeAction): Set<string> {
+  switch (action.type) {
+    case "toggle": { const n = new Set(state); n.has(action.path) ? n.delete(action.path) : n.add(action.path); return n; }
+    case "expandAll": return new Set(action.paths);
+    case "collapseAll": return new Set();
+  }
+}
+
 let reqId = 0;
 
 export function JsonFormatterPage() {
@@ -38,6 +63,7 @@ export function JsonFormatterPage() {
   const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([]);
   const [copyDone, setCopyDone] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [treeExpanded, dispatchTree] = useReducer(treeReducer, new Set<string>(["$"]));
 
   const workerRef = useRef<Worker | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -137,6 +163,16 @@ export function JsonFormatterPage() {
     setSearchQuery("");
     setSearchMatches([]);
   }, []);
+
+  const handleExpandAll = useCallback(() => {
+    const paths: string[] = [];
+    collectTreePaths(output?.treeData, "$", paths);
+    dispatchTree({ type: "expandAll", paths });
+  }, [output]);
+
+  const handleCollapseAll = useCallback(() => dispatchTree({ type: "collapseAll" }), []);
+
+  const handleTreeToggle = useCallback((path: string) => dispatchTree({ type: "toggle", path }), []);
 
   const toggleSearch = useCallback(() => {
     setSearchOpen(o => {
@@ -266,11 +302,38 @@ export function JsonFormatterPage() {
                   {mode === "formatted" ? "Formatted" : "Tree"}
                 </button>
               ))}
-              {output && (
-                <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
-                  {output.stats.lines} lines · {output.stats.keys} keys
-                </span>
-              )}
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "2px" }}>
+                {viewMode === "tree" && (
+                  <>
+                    <button
+                      onClick={handleExpandAll}
+                      aria-label="Expand all"
+                      title="Expand all"
+                      style={{ display: "inline-flex", alignItems: "center", padding: "4px 6px", border: "none", background: "none", color: "var(--text-secondary)", cursor: "pointer", borderRadius: "4px" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-base)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                    >
+                      <ChevronsDown size={14} />
+                    </button>
+                    <button
+                      onClick={handleCollapseAll}
+                      aria-label="Collapse all"
+                      title="Collapse all"
+                      style={{ display: "inline-flex", alignItems: "center", padding: "4px 6px", border: "none", background: "none", color: "var(--text-secondary)", cursor: "pointer", borderRadius: "4px" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-base)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                    >
+                      <ChevronsUp size={14} />
+                    </button>
+                    <div style={{ width: "1px", height: "16px", background: "var(--border)", margin: "0 4px" }} />
+                  </>
+                )}
+                {output && (
+                  <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                    {output.stats.lines} lines · {output.stats.keys} keys
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Output content */}
@@ -279,7 +342,7 @@ export function JsonFormatterPage() {
                 <FormattedView tokens={output?.tokens ?? []} />
               )}
               {viewMode === "tree" && (
-                <TreeView data={output?.treeData} />
+                <TreeView data={output?.treeData} expanded={treeExpanded} onToggle={handleTreeToggle} />
               )}
             </div>
 
