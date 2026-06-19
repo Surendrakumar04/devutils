@@ -11,6 +11,8 @@ import { SearchBar } from "./components/SearchBar";
 import { RepairSuccessBanner } from "./components/RepairBanner";
 import { KeyboardLegend } from "./components/KeyboardLegend";
 import { canShare, encodeShareUrl, decodeShareUrl } from "@/lib/json/shareUrl";
+import { parse } from "@/lib/json/parse";
+import { toTypeScriptInterface } from "@/lib/json/toTypeScriptInterface";
 import type { RepairResult } from "@/lib/json/repair";
 import type { SearchMatch } from "@/lib/json/search";
 
@@ -117,7 +119,14 @@ export function JsonFormatterPage() {
   const handleMinify = useCallback(() => postToWorker({ type: "minify", input }), [input]);
   const handleRepair = useCallback(() => postToWorker({ type: "repair", input, indent: 2 }), [input]);
   const handleSortKeys = useCallback(() => postToWorker({ type: "sortKeys", input, indent: 2 }), [input]);
-  const handleToTs = useCallback(() => postToWorker({ type: "toTs", input }), [input]);
+  const handleToTs = useCallback(() => {
+    if (!input.trim()) return;
+    const parsed = parse(input);
+    if (!parsed.ok) return;
+    const result = toTypeScriptInterface(parsed.value);
+    setTsOutput(result);
+    setViewMode("ts");
+  }, [input]);
 
   const handleCopy = useCallback(() => {
     const text = viewMode === "ts" ? tsOutput : output?.formatted ?? "";
