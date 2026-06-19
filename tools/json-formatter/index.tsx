@@ -184,15 +184,12 @@ export function JsonFormatterPage() {
   const PANE_HEIGHT = "calc(100vh - 48px - 102px - 120px)"; // viewport - header - leaderboard - toolbar
 
   return (
-    <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "20px 24px 40px" }}>
+    <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "12px 24px 40px" }}>
       {/* Page header */}
-      <div style={{ marginBottom: "16px" }}>
-        <h1 style={{ margin: "0 0 4px", fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+      <div style={{ marginBottom: "10px" }}>
+        <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
           JSON Formatter & Validator
         </h1>
-        <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)" }}>
-          Format, validate, and repair JSON — 100% in your browser. No data is ever sent to a server.
-        </p>
       </div>
 
       {/* Tool card */}

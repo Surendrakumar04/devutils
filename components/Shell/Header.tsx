@@ -18,7 +18,7 @@ export function Header() {
     >
       <div
         style={{
-          maxWidth: "1280px",
+          maxWidth: "1600px",
           width: "100%",
           margin: "0 auto",
           display: "flex",

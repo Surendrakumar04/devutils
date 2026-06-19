@@ -57,7 +57,7 @@ export default async function ToolPage({
         style={{
           display: "flex",
           justifyContent: "center",
-          padding: "12px 16px",
+          padding: "8px 16px",
           background: "var(--bg-base)",
         }}
       >
