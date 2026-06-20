@@ -96,6 +96,12 @@ function diffComplex(
   lines: DiffLine[],
   stats: DiffResult["stats"]
 ): void {
+  // Primitive — push a single line and return
+  if (value === null || typeof value !== "object") {
+    lines.push({ type, path, key, leftValue: serialize(value), rightValue: serialize(value), indent });
+    return;
+  }
+
   const isArr = Array.isArray(value);
   const openChar = isArr ? "[" : "{";
   const closeChar = isArr ? "]" : "}";
