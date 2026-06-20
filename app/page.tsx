@@ -3,8 +3,8 @@ import { TOOLS } from "@/registry/tools";
 import { ToolCard } from "@/components/ToolCard";
 
 export const metadata: Metadata = {
-  title: "DevUtils — Free Developer Tools",
-  description: "Free, fast developer utilities that run 100% in your browser. No data sent to any server.",
+  title: "JsonWiz — Free JSON Formatter, Validator & Repair Tool",
+  description: "Format, validate, and repair JSON instantly in your browser. No sign-up, no data sent to any server. Free forever.",
 };
 
 export default function HomePage() {
@@ -15,10 +15,10 @@ export default function HomePage() {
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "48px 16px" }}>
       <div style={{ marginBottom: "40px" }}>
         <h1 style={{ margin: "0 0 8px", fontSize: "28px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-          Developer Tools
+          JSON Tools — Free & In-Browser
         </h1>
         <p style={{ margin: 0, fontSize: "16px", color: "var(--text-secondary)" }}>
-          Fast, free utilities that run entirely in your browser. Zero data collection.
+          Format, validate, repair, and explore JSON. Everything runs in your browser — your data never leaves your device.
         </p>
       </div>
 
