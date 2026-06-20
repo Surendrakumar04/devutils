@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer
@@ -23,7 +25,15 @@ export function Footer() {
           color: "var(--text-secondary)",
         }}
       >
-        <span>© {new Date().getFullYear()} devutils.tools</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span>© {new Date().getFullYear()} JsonWiz</span>
+          <Link href="/privacy" style={{ color: "var(--text-secondary)", textDecoration: "none" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--accent)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-secondary)")}
+          >
+            Privacy Policy
+          </Link>
+        </div>
         <span
           style={{
             display: "flex",
