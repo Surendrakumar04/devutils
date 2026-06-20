@@ -4,7 +4,7 @@ import { TOOLS } from "@/registry/tools";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://devutils.tools";
+  const base = "https://jsonwiz.dev";
 
   const toolEntries = TOOLS.map((tool) => ({
     url: `${base}/tools/${tool.slug}`,
