@@ -25,8 +25,8 @@ const PLACEHOLDER_RIGHT = `{
 }`;
 
 export function JsonDiffPage() {
-  const [left, setLeft] = useState("");
-  const [right, setRight] = useState("");
+  const [left, setLeft] = useState(PLACEHOLDER_LEFT);
+  const [right, setRight] = useState(PLACEHOLDER_RIGHT);
   const [diffResult, setDiffResult] = useState<DiffResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [errorLeft, setErrorLeft] = useState("");
@@ -39,6 +39,9 @@ export function JsonDiffPage() {
   useEffect(() => {
     const w = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
     workerRef.current = w;
+    w.postMessage({ type: "diff", left: PLACEHOLDER_LEFT, right: PLACEHOLDER_RIGHT, id: ++reqId });
+    setIsProcessing(true);
+
     w.onmessage = (e) => {
       const msg = e.data;
       setIsProcessing(false);
@@ -107,8 +110,8 @@ export function JsonDiffPage() {
 
   const hasInput = left.trim().length > 0 || right.trim().length > 0;
   const hasDiff = !!diffResult;
-  const PANE_HEIGHT = "calc((100vh - 48px - 102px - 57px) / 2)";
-  const DIFF_HEIGHT = "calc(100vh - 48px - 102px - 57px - 220px)";
+  const PANE_HEIGHT = "180px";
+  const DIFF_HEIGHT = "calc(100vh - 48px - 102px - 57px - 180px - 28px - 28px - 42px - 24px)";
 
   return (
     <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "12px 24px 40px" }}>
