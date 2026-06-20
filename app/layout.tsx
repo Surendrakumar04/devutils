@@ -23,6 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <DarkModeScript />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3489070977549568"
+          crossOrigin="anonymous"
+        />
       </head>
       <body>
         <Shell>{children}</Shell>
