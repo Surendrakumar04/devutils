@@ -37,7 +37,7 @@ export function Header() {
             letterSpacing: "-0.02em",
           }}
         >
-          devutils<span style={{ color: "var(--accent)" }}>.tools</span>
+          jsonwiz<span style={{ color: "var(--accent)" }}>.dev</span>
         </Link>
 
         <ThemeToggle />

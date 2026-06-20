@@ -4,14 +4,14 @@ import { Shell } from "@/components/Shell";
 import { DarkModeScript } from "@/components/DarkModeScript";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://devutils.tools"),
+  metadataBase: new URL("https://jsonwiz.dev"),
   title: {
-    default: "DevUtils — Free Developer Tools",
-    template: "%s | DevUtils",
+    default: "JsonWiz — Free JSON Tools",
+    template: "%s | JsonWiz",
   },
-  description: "Free, fast developer utilities that run 100% in your browser. Your data never leaves your device.",
+  description: "Free, fast JSON tools that run 100% in your browser. Format, validate, repair and explore JSON. Your data never leaves your device.",
   openGraph: {
-    siteName: "DevUtils",
+    siteName: "JsonWiz",
     type: "website",
   },
 };

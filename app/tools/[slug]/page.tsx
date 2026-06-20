@@ -25,7 +25,7 @@ export async function generateMetadata({
       title: tool.title,
       description: tool.description,
       type: "website",
-      url: `https://devutils.tools/tools/${tool.slug}`,
+      url: `https://jsonwiz.dev/tools/${tool.slug}`,
     },
     other: {
       "application-name": tool.title,
