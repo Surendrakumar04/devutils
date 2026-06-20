@@ -99,7 +99,7 @@ export function JsonToCsvPage() {
         onChange={e => handleInput(e.target.value)}
         placeholder={`Paste a JSON array of objects...\n\nExample:\n[\n  {"name":"Alice","age":30,"city":"NYC"},\n  {"name":"Bob","age":25,"city":"LA"}\n]`}
         spellCheck={false}
-        style={{ ...textareaStyle, height: "340px" }}
+        style={{ ...textareaStyle, height: "calc(100vh - 320px)", minHeight: "400px" }}
       />
     </div>
   );
@@ -129,7 +129,7 @@ export function JsonToCsvPage() {
         readOnly
         placeholder="CSV output will appear here after conversion..."
         spellCheck={false}
-        style={{ ...textareaStyle, height: "340px", color: output ? "var(--text-primary)" : "var(--text-muted)" }}
+        style={{ ...textareaStyle, height: "calc(100vh - 320px)", minHeight: "400px", color: output ? "var(--text-primary)" : "var(--text-muted)" }}
       />
     </div>
   );

@@ -72,7 +72,7 @@ export function Base64Page() {
     color: "var(--text-secondary)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px",
   };
   const textareaStyle: React.CSSProperties = {
-    width: "100%", height: "260px", resize: "none", border: "none", outline: "none",
+    width: "100%", height: "calc(100vh - 340px)", minHeight: "400px", resize: "none", border: "none", outline: "none",
     fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.7,
     padding: "14px 16px", background: "var(--bg-surface)", color: "var(--text-primary)",
   };
