@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Maximize2, Minimize2 } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { Toolbar } from "./components/Toolbar";
 import { DiffView } from "./components/DiffView";
@@ -20,6 +20,7 @@ export function JsonDiffPage() {
   const [errorRight, setErrorRight] = useState("");
   const [copyDone, setCopyDone] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const workerRef = useRef<Worker | null>(null);
   const diffRef = useRef<HTMLDivElement | null>(null);
@@ -132,8 +133,8 @@ export function JsonDiffPage() {
           isProcessing={isProcessing}
         />
 
-        {/* Input panes — always full height */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }} className="formatter-grid">
+        {/* Input panes — hidden when expanded */}
+        <div style={{ display: isExpanded ? "none" : "grid", gridTemplateColumns: "1fr 1fr" }} className="formatter-grid">
           <div style={{ borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column" }}>
             <PaneHeader label="Original" error={errorLeft} />
             <div style={{ height: "340px" }}>
@@ -160,8 +161,8 @@ export function JsonDiffPage() {
           </div>
         </div>
 
-        {/* Compare CTA — shown when no diff yet */}
-        {!hasDiff && (
+        {/* Compare CTA — shown when no diff yet and not expanded */}
+        {!hasDiff && !isExpanded && (
           <div style={{
             borderTop: "1px solid var(--border)",
             padding: "16px",
@@ -201,14 +202,37 @@ export function JsonDiffPage() {
               <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Diff result
               </span>
-              <button
-                onClick={() => setDiffResult(null)}
-                style={{ fontSize: "11px", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
-              >
-                ✕ Close
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <button
+                  onClick={() => setIsExpanded(e => !e)}
+                  title={isExpanded ? "Minimize — show inputs" : "Expand — hide inputs, full view"}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "5px",
+                    fontSize: "12px", fontWeight: 500,
+                    color: "var(--text-secondary)", background: "var(--bg-surface)",
+                    border: "1px solid var(--border)", borderRadius: "5px",
+                    cursor: "pointer", padding: "3px 10px",
+                  }}
+                >
+                  {isExpanded
+                    ? <><Minimize2 size={12} /> Minimize</>
+                    : <><Maximize2 size={12} /> Expand</>}
+                </button>
+                {!isExpanded && (
+                  <button
+                    onClick={() => { setDiffResult(null); setIsExpanded(false); }}
+                    style={{ fontSize: "11px", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
+                  >
+                    ✕ Close
+                  </button>
+                )}
+              </div>
             </div>
-            <DiffView lines={diffResult.lines} mode={viewMode} height="400px" />
+            <DiffView
+              lines={diffResult.lines}
+              mode={viewMode}
+              height={isExpanded ? "calc(100vh - 48px - 102px - 42px - 37px)" : "400px"}
+            />
           </div>
         )}
       </div>
