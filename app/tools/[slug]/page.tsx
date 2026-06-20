@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { TOOLS } from "@/registry/tools";
 import { AdSlot } from "@/components/AdSlot";
 import { JsonFormatterPage } from "@/tools/json-formatter";
+import { JsonDiffPage } from "@/tools/json-diff";
 
 export function generateStaticParams() {
   return TOOLS.map((t) => ({ slug: t.slug }));
@@ -35,7 +36,7 @@ export async function generateMetadata({
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   "json-formatter": JsonFormatterPage,
-
+  "json-diff": JsonDiffPage,
 };
 
 export default async function ToolPage({

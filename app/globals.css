@@ -29,6 +29,12 @@
                Helvetica, Arial, sans-serif, "Apple Color Emoji";
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
                Courier, monospace;
+
+  /* Diff colors */
+  --diff-added-text:   #15803d;
+  --diff-removed-text: #b91c1c;
+  --diff-changed-text: #92400e;
+  --diff-key-color:    #0F6FDC;
 }
 
 .dark {
@@ -45,6 +51,12 @@
   --success:        #3FB950;
   --error:          #F85149;
   --warning:        #D29922;
+
+  /* Diff colors */
+  --diff-added-text:   #4ade80;
+  --diff-removed-text: #f87171;
+  --diff-changed-text: #fbbf24;
+  --diff-key-color:    #58A6FF;
 
   --token-string:  #3FB950;
   --token-number:  #58A6FF;
