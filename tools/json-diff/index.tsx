@@ -11,22 +11,9 @@ type ViewMode = "split" | "unified";
 
 let reqId = 0;
 
-const PLACEHOLDER_LEFT = `{
-  "name": "Alice",
-  "age": 30,
-  "role": "admin"
-}`;
-
-const PLACEHOLDER_RIGHT = `{
-  "name": "Alice",
-  "age": 31,
-  "role": "admin",
-  "email": "alice@example.com"
-}`;
-
 export function JsonDiffPage() {
-  const [left, setLeft] = useState(PLACEHOLDER_LEFT);
-  const [right, setRight] = useState(PLACEHOLDER_RIGHT);
+  const [left, setLeft] = useState("");
+  const [right, setRight] = useState("");
   const [diffResult, setDiffResult] = useState<DiffResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [errorLeft, setErrorLeft] = useState("");
@@ -35,13 +22,11 @@ export function JsonDiffPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const workerRef = useRef<Worker | null>(null);
+  const diffRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const w = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
     workerRef.current = w;
-    w.postMessage({ type: "diff", left: PLACEHOLDER_LEFT, right: PLACEHOLDER_RIGHT, id: ++reqId });
-    setIsProcessing(true);
-
     w.onmessage = (e) => {
       const msg = e.data;
       setIsProcessing(false);
@@ -49,6 +34,7 @@ export function JsonDiffPage() {
         setDiffResult({ lines: msg.lines, stats: msg.stats });
         setErrorLeft("");
         setErrorRight("");
+        setTimeout(() => diffRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
       } else if (msg.type === "error") {
         if (msg.side === "left") setErrorLeft(msg.message);
         else if (msg.side === "right") setErrorRight(msg.message);
@@ -87,9 +73,7 @@ export function JsonDiffPage() {
       const sign = l.type === "added" ? "+" : l.type === "removed" ? "-" : l.type === "changed" ? "~" : " ";
       const indent = "  ".repeat(l.indent);
       const key = l.key ? `"${l.key}": ` : "";
-      const val = l.type === "changed"
-        ? `${l.leftValue} → ${l.rightValue}`
-        : (l.leftValue ?? "");
+      const val = l.type === "changed" ? `${l.leftValue} → ${l.rightValue}` : (l.leftValue ?? "");
       return `${sign} ${indent}${key}${val}`;
     }).join("\n");
     navigator.clipboard.writeText(text).then(() => {
@@ -110,8 +94,20 @@ export function JsonDiffPage() {
 
   const hasInput = left.trim().length > 0 || right.trim().length > 0;
   const hasDiff = !!diffResult;
-  const PANE_HEIGHT = "180px";
-  const DIFF_HEIGHT = "calc(100vh - 48px - 102px - 57px - 180px - 28px - 28px - 42px - 24px)";
+
+  const textareaStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    resize: "none",
+    border: "none",
+    outline: "none",
+    fontFamily: "var(--font-mono)",
+    fontSize: "13px",
+    lineHeight: 1.7,
+    padding: "14px 16px",
+    background: "var(--bg-surface)",
+    color: "var(--text-primary)",
+  };
 
   return (
     <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "12px 24px 40px" }}>
@@ -136,45 +132,85 @@ export function JsonDiffPage() {
           isProcessing={isProcessing}
         />
 
-        {/* Input panes */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid var(--border)" }} className="formatter-grid">
-          {/* Left */}
+        {/* Input panes — always full height */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }} className="formatter-grid">
           <div style={{ borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column" }}>
             <PaneHeader label="Original" error={errorLeft} />
-            <textarea
-              value={left}
-              onChange={e => setLeft(e.target.value)}
-              placeholder={PLACEHOLDER_LEFT}
-              spellCheck={false}
-              style={{
-                flex: 1, resize: "none", border: "none", outline: "none",
-                fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.6,
-                padding: "10px 12px", background: "var(--bg-surface)",
-                color: "var(--text-primary)", height: PANE_HEIGHT,
-              }}
-            />
+            <div style={{ height: "340px" }}>
+              <textarea
+                value={left}
+                onChange={e => { setLeft(e.target.value); setDiffResult(null); }}
+                placeholder={`Paste original JSON here...\n\nExample:\n{\n  "name": "Alice",\n  "age": 30\n}`}
+                spellCheck={false}
+                style={textareaStyle}
+              />
+            </div>
           </div>
-
-          {/* Right */}
           <div style={{ display: "flex", flexDirection: "column" }}>
             <PaneHeader label="Modified" error={errorRight} />
-            <textarea
-              value={right}
-              onChange={e => setRight(e.target.value)}
-              placeholder={PLACEHOLDER_RIGHT}
-              spellCheck={false}
-              style={{
-                flex: 1, resize: "none", border: "none", outline: "none",
-                fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.6,
-                padding: "10px 12px", background: "var(--bg-surface)",
-                color: "var(--text-primary)", height: PANE_HEIGHT,
-              }}
-            />
+            <div style={{ height: "340px" }}>
+              <textarea
+                value={right}
+                onChange={e => { setRight(e.target.value); setDiffResult(null); }}
+                placeholder={`Paste modified JSON here...\n\nExample:\n{\n  "name": "Alice",\n  "age": 31,\n  "email": "alice@example.com"\n}`}
+                spellCheck={false}
+                style={textareaStyle}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Diff output */}
-        <DiffView lines={diffResult?.lines ?? []} mode={viewMode} height={DIFF_HEIGHT} />
+        {/* Compare CTA — shown when no diff yet */}
+        {!hasDiff && (
+          <div style={{
+            borderTop: "1px solid var(--border)",
+            padding: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            background: "var(--bg-subtle)",
+          }}>
+            <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+              Paste JSON in both panes, then
+            </span>
+            <button
+              onClick={handleCompare}
+              disabled={!hasInput || isProcessing}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                padding: "7px 16px", background: "var(--accent)", color: "#fff",
+                border: "none", borderRadius: "6px", fontSize: "13px",
+                fontWeight: 600, cursor: hasInput ? "pointer" : "not-allowed",
+                opacity: hasInput ? 1 : 0.5,
+              }}
+            >
+              Compare  <kbd style={{ fontSize: "11px", opacity: 0.8, fontFamily: "var(--font-mono)", background: "rgba(255,255,255,0.2)", padding: "1px 5px", borderRadius: "3px" }}>⌘↵</kbd>
+            </button>
+          </div>
+        )}
+
+        {/* Diff output — only shown after compare */}
+        {hasDiff && (
+          <div ref={diffRef} style={{ borderTop: "1px solid var(--border)" }}>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "6px 12px", background: "var(--bg-subtle)",
+              borderBottom: "1px solid var(--border)",
+            }}>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Diff result
+              </span>
+              <button
+                onClick={() => setDiffResult(null)}
+                style={{ fontSize: "11px", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "2px 6px" }}
+              >
+                ✕ Close
+              </button>
+            </div>
+            <DiffView lines={diffResult.lines} mode={viewMode} height="400px" />
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", justifyContent: "center", marginTop: "24px" }}>
@@ -190,7 +226,7 @@ function PaneHeader({ label, error }: { label: string; error: string }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "5px 12px", background: "var(--bg-subtle)",
+      padding: "6px 14px", background: "var(--bg-subtle)",
       borderBottom: "1px solid var(--border)", flexShrink: 0,
     }}>
       <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -227,7 +263,7 @@ function SeoContent() {
         <ol style={{ ...bodyStyle, paddingLeft: "16px" }}>
           <li>Paste original JSON in the left pane</li>
           <li>Paste modified JSON in the right pane</li>
-          <li>Click Compare (or ⌘ + Enter)</li>
+          <li>Click Compare or press ⌘ + Enter</li>
           <li>Toggle between Split and Unified view</li>
         </ol>
       </div>
